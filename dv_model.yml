@@ -1,0 +1,2 @@
+## load_tk -- use the invocation_id from the dbt-event-logging framework?
+metadata-columns: ["load_tk, load_dte"]
