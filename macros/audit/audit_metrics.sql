@@ -63,18 +63,14 @@ for MS SQL, we could:
 {% endmacro %}
 
 {% macro log_metrics_start_event() %}
-    {% if is_incremental() %}
     {{dbt_dv_utils.log_metrics_event(
         'model initial rowcount', this.schema, this.name
         )}}
-    {% endif %}
 {% endmacro %}
 
 
 {% macro log_metrics_end_event() %}
-    {% if is_incremental() %}
     {{dbt_dv_utils.log_metrics_event(
         'model final rowcount', this.schema, this.name
         )}}
-    {% endif %}
 {% endmacro %}
