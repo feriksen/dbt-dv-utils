@@ -21,7 +21,7 @@ for MS SQL, we could:
   select sum([rows])
   from sys.partitions where index_id = min(index_id) to be much(!) more efficient
 #}
-{% macro log_metrics_event() %}
+{% macro persist_metrics_event() %}
 
         insert into {{ dbt_dv_utils.get_metrics_relation() }} (
             event_name,
@@ -34,13 +34,13 @@ for MS SQL, we could:
             )
         select
             '{{ event_name }}',
-            this.schema,
-            this.name,
+            '{{ schema }}',
+            '{{ relation }}',
             '{{ invocation_id }}',
             sum(case when invocation_id = '{{ invocation_id }}' then 0 else 1 end),
             sum(case when invocation_id = '{{ invocation_id }}' then 1 else 0 end),
             count(*)
-            from  "{{ this.schema }}"."{{ this.relation }}"
+            from  "{{ schema }}"."{{ relation }}"
 
 {% endmacro %}
 
@@ -62,4 +62,8 @@ for MS SQL, we could:
        final_row_count int
     )
 
+{% endmacro %}
+
+{% macro log_metrics_event() %}
+    {{ dbt_dv_utils.persist_metrics_event(this.schema, this.name) }}
 {% endmacro %}
