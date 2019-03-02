@@ -1,3 +1,4 @@
+{#
 select  {Hash Key},
         , dbt.dv.utils(context_columns)
         {{ hashdiff }},
@@ -14,3 +15,4 @@ group by
         , dbt.dv.utils(star)
         , src.diff_hsh
         , src.dbt_dv_utils_ts
+#}
