@@ -38,7 +38,7 @@ for MS SQL, we could:
             '{{ schema }}',
             '{{ relation }}',
             '{{ invocation_id }}',
-            'project.version',
+            '{{ project.version }}',
             sum(case when invocation_id = '{{ invocation_id }}' then 0 else 1 end),
             sum(case when invocation_id = '{{ invocation_id }}' then 1 else 0 end),
             count(*)
