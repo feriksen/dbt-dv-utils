@@ -21,51 +21,26 @@ for MS SQL, we could:
   select sum([rows])
   from sys.partitions where index_id = min(index_id) to be much(!) more efficient
 #}
-{% macro log_metrics_event_zero(event_name, schema, relation) %}
+{% macro log_metrics_end_event(event_name, schema, relation) %}
+
         insert into {{ dbt_dv_utils.get_metrics_relation() }} (
             event_name,
             event_schema,
             event_model,
             invocation_id,
-            event_row_count
+            initial_row_count,
+            run_row_count,
+            final_row_count
             )
-
         select
             '{{ event_name }}',
             {% if variable != None %}'{{ schema }}'{% else %}null::varchar(512){% endif %},
             {% if variable != None %}'{{ relation }}'{% else %}null::varchar(512){% endif %},
             '{{ invocation_id }}',
-            0
-
-{% endmacro %}
-
-{% macro log_metrics_event(event_name, schema, relation) %}
-        insert into {{ dbt_dv_utils.get_metrics_relation() }} (
-            event_name,
-            event_schema,
-            event_model,
-            invocation_id,
-            event_row_count
-            )
-
-        select
-            '{{ event_name }}',
-            {% if variable != None %}'{{ schema }}'{% else %}null::varchar(512){% endif %},
-            {% if variable != None %}'{{ relation }}'{% else %}null::varchar(512){% endif %},
-            '{{ invocation_id }}',
+            sum(case when invocation_id = '{{ invocation_id }}' then 0 else 1 end),
+            sum(case when invocation_id = '{{ invocation_id }}' then 1 else 0 end),
             count(*)
             from  "{{ schema }}"."{{ relation }}"
-        union
-        select
-            'model run rowcount',
-            {% if variable != None %}'{{ schema }}'{% else %}null::varchar(512){% endif %},
-            {% if variable != None %}'{{ relation }}'{% else %}null::varchar(512){% endif %},
-            '{{ invocation_id }}',
-            count(*)
-            from  "{{ schema }}"."{{ relation }}" dest
-            where dest.invocation_id = '{{ invocation_id }}'
-            and exists (select 1 from "{{ schema }}"."{{ relation }}" dest2 dest2.invocation_id = '{{ invocation_id }}')
-
 {% endmacro %}
 
 {% macro create_metrics_schema() %}
@@ -81,26 +56,9 @@ for MS SQL, we could:
        event_schema     varchar(512),
        event_model      varchar(512),
        invocation_id    varchar(512),
-       event_row_count  int
+       initial_row_count int,
+       run_row_count  int,
+       final_row_count int
     )
 
-{% endmacro %}
-
-{% macro log_metrics_start_event() %}
-    {% if flags.FULL_REFRESH %}
-    {{dbt_dv_utils.log_metrics_event_zero(
-        'model initial rowcount', this.schema, this.name
-        )}}
-    {% else %}
-        {{dbt_dv_utils.log_metrics_event(
-            'model initial rowcount', this.schema, this.name
-            )}}
-        {% endif %}
-{% endmacro %}
-
-
-{% macro log_metrics_end_event() %}
-    {{dbt_dv_utils.log_metrics_event(
-        'model final rowcount', this.schema, this.name
-        )}}
 {% endmacro %}
