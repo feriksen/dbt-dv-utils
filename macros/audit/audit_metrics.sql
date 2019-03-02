@@ -28,6 +28,7 @@ for MS SQL, we could:
             event_schema,
             event_model,
             invocation_id,
+            project_version,
             initial_row_count,
             run_row_count,
             final_row_count
@@ -37,6 +38,7 @@ for MS SQL, we could:
             '{{ schema }}',
             '{{ relation }}',
             '{{ invocation_id }}',
+            {{ var('version') }}',
             sum(case when invocation_id = '{{ invocation_id }}' then 0 else 1 end),
             sum(case when invocation_id = '{{ invocation_id }}' then 1 else 0 end),
             count(*)
@@ -57,6 +59,7 @@ for MS SQL, we could:
        event_schema     varchar(512),
        event_model      varchar(512),
        invocation_id    varchar(512),
+       project_version  varchar(512),
        initial_row_count int,
        run_row_count  int,
        final_row_count int
@@ -66,6 +69,10 @@ for MS SQL, we could:
 
 {% macro log_metrics_event() %}
     {%- set event_name = 'model run' -%}
+
+    {% if flags.NON_DESTRUCTIVE %}
+        {%- set event_name = event_name~':NON_DESTRUCTIVE' -%}
+    {% endif %}
 
     {% if flags.FULL_REFRESH %}
         {%- set event_name = event_name~':FULL_REFRESH' -%}
