@@ -27,7 +27,6 @@ for MS SQL, we could:
 
     insert into {{ dbt_dv_utils.get_metrics_relation() }} (
         event_name,
-        event_timestamp,
         event_schema,
         event_model,
         invocation_id,
@@ -40,7 +39,7 @@ for MS SQL, we could:
         {% if variable != None %}'{{ relation }}'{% else %}null::varchar(512){% endif %},
         '{{ invocation_id }}',
         count(*)
-        from  "{{ schema }}"."{{ relation }}"        
+        from  "{{ schema }}"."{{ relation }}"
 
 {% endmacro %}
 
