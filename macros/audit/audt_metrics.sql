@@ -60,7 +60,7 @@ shamelessly stolen from dbt-event-logging
 
 {% endmacro %}
 
-{% macro log_model_start_event() %}
+{% macro log_model_metric_start_event() %}
     {% if is_incremental() %}
     {{logging.log_audit_metrics_event(
         'model initial rowcount', this.schema, this.name
@@ -69,7 +69,7 @@ shamelessly stolen from dbt-event-logging
 {% endmacro %}
 
 
-{% macro log_model_end_event() %}
+{% macro log_model_audit_metric_end_event() %}
     {% if is_incremental() %}
     {{logging.log_audit_metrics_event(
         'model final rowcount', this.schema, this.name
