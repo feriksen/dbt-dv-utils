@@ -21,7 +21,7 @@ for MS SQL, we could:
   select sum([rows])
   from sys.partitions where index_id = min(index_id) to be much(!) more efficient
 #}
-{% macro persist_metrics_event(schema, relation) %}
+{% macro persist_metrics_event(event_name, schema, relation) %}
 
         insert into {{ dbt_dv_utils.get_metrics_relation() }} (
             event_name,
@@ -65,5 +65,11 @@ for MS SQL, we could:
 {% endmacro %}
 
 {% macro log_metrics_event() %}
-    {{ dbt_dv_utils.persist_metrics_event(this.schema, this.name) }}
+    {%- set event_name = 'model run' -%}
+
+    {% if flags.FULL_REFRESH %}
+        {%- set event_name = event_name~':FULL_REFRESH' -%}
+    {% endif %}
+
+    {{ dbt_dv_utils.persist_metrics_event(event_name, this.schema, this.name) }}
 {% endmacro %}
