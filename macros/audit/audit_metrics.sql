@@ -23,7 +23,7 @@ for MS SQL, we could:
 #}
 {% macro persist_metrics_event() %}
 
-        insert into {{ dbt_dv_utils.get_metrics_relation() }} (
+        insert into {{ dbt_dv_utils.get_metrics_relation(schema, relation) }} (
             event_name,
             event_schema,
             event_model,
