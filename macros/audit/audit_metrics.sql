@@ -40,8 +40,7 @@ for MS SQL, we could:
         {% if variable != None %}'{{ relation }}'{% else %}null::varchar(512){% endif %},
         '{{ invocation_id }}',
         count(*)
-        from  "{{ schema }}"."{{ relation }}"
-        )
+        from  "{{ schema }}"."{{ relation }}"        
 
 {% endmacro %}
 
