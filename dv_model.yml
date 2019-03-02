@@ -1,2 +1,5 @@
 ## load_tk -- use the invocation_id from the dbt-event-logging framework?
-metadata-columns: ["load_tk, load_dte"]
+hash-diff-column-name: diff_hsh
+load-audit-column-name: invocation_id
+load-date-column-name: load_dte
+metadata-column-list: ['{{hash-diff-column-name}}, {{load-audit-column-name}},{{load-date-column-name}}']
