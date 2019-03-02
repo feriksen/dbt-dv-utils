@@ -2,26 +2,26 @@
 shamelessly stolen from dbt-event-logging
 #}
 
-{% macro get_audit_metrics_relation() %}
-    {%- set audit_table =
+{% macro get_metrics_relation() %}
+    {%- set metrics_table =
         api.Relation.create(
-            identifier='dbt_audit_metrics',
+            identifier='dbt_metrics',
             schema=target.schema~'_meta',
             type='table'
         ) -%}
-    {{ return(audit_table) }}
+    {{ return(metrics_table) }}
 {% endmacro %}
 
 
-{% macro get_audit_metrics_schema() %}
-    {% set audit_table = logging.get_audit_metrics_relation() %}
-    {{ return(audit_table.include(schema=True, identifier=False)) }}
+{% macro get_metrics_schema() %}
+    {% set metrics_table = dbt_dv_utils.get_metrics_relation() %}
+    {{ return(metrics_table.include(schema=True, identifier=False)) }}
 {% endmacro %}
 
 
-{% macro log_audit_metrics_event(event_name, schema, relation) %}
+{% macro log_metrics_event(event_name, schema, relation) %}
 
-    insert into {{ logging.get_audit_metrics_relation() }} (
+    insert into {{ dbt_dv_utils.get_metrics_relation() }} (
         event_name,
         event_timestamp,
         event_schema,
@@ -42,14 +42,14 @@ shamelessly stolen from dbt-event-logging
 {% endmacro %}
 
 
-{% macro create_audit_metrics_schema() %}
-    create schema if not exists {{ logging.get_audit_metrics_schema() }}
+{% macro create_metrics_schema() %}
+    create schema if not exists {{ dbt_dv_utils.get_metrics_schema() }}
 {% endmacro %}
 
 
-{% macro create_audit_metrics_table() %}
+{% macro create_metrics_table() %}
 
-    create table if not exists {{ logging.get_audit_metrics_relation() }}
+    create table if not exists {{ dbt_dv_utils.get_metrics_relation() }}
     (
        event_name       varchar(512),
        event_schema     varchar(512),
@@ -62,16 +62,16 @@ shamelessly stolen from dbt-event-logging
 
 {% macro log_model_metric_start_event() %}
     {% if is_incremental() %}
-    {{logging.log_audit_metrics_event(
+    {{dbt_dv_utils.log_metrics_event(
         'model initial rowcount', this.schema, this.name
         )}}
     {% endif %}
 {% endmacro %}
 
 
-{% macro log_model_audit_metric_end_event() %}
+{% macro log_model_metric_end_event() %}
     {% if is_incremental() %}
-    {{logging.log_audit_metrics_event(
+    {{dbt_dv_utils.log_metrics_event(
         'model final rowcount', this.schema, this.name
         )}}
     {% endif %}
