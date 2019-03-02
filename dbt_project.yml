@@ -1,5 +1,5 @@
 
-name: 'dbt-dv-utils'
+name: 'dbt_dv_utils'
 version: '0.1.0'
 
 target-path: "target"
