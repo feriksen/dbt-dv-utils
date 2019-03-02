@@ -21,9 +21,9 @@ for MS SQL, we could:
   select sum([rows])
   from sys.partitions where index_id = min(index_id) to be much(!) more efficient
 #}
-{% macro persist_metrics_event() %}
+{% macro persist_metrics_event(schema, relation) %}
 
-        insert into {{ dbt_dv_utils.get_metrics_relation(schema, relation) }} (
+        insert into {{ dbt_dv_utils.get_metrics_relation() }} (
             event_name,
             event_schema,
             event_model,
