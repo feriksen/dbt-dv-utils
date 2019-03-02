@@ -18,7 +18,11 @@ shamelessly stolen from dbt-event-logging
     {{ return(metrics_table.include(schema=True, identifier=False)) }}
 {% endmacro %}
 
-
+{#
+for MS SQL, we could:
+  select sum([rows])
+  from sys.partitions where index_id = min(index_id) to be much(!) more efficient
+#}
 {% macro log_metrics_event(event_name, schema, relation) %}
 
     insert into {{ dbt_dv_utils.get_metrics_relation() }} (
@@ -36,7 +40,7 @@ shamelessly stolen from dbt-event-logging
         {% if variable != None %}'{{ relation }}'{% else %}null::varchar(512){% endif %},
         '{{ invocation_id }}',
         count(*)
-        from  {{ schema }}.{{ relation }}
+        from  "{{ schema }}"."{{ relation }}"
         )
 
 {% endmacro %}
