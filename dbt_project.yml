@@ -6,3 +6,7 @@ target-path: "target"
 clean-targets: ["target", "dbt_modules"]
 macro-paths: ["macros"]
 log-path: "logs"
+
+on-run-start:
+  - "{{ dbt_dv_utils.create_audit_metrics_schema() }}"
+  - "{{ dbt_dv_utils.create_audit_metrics_table() }}"

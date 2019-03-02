@@ -1,5 +1,4 @@
 {#
-
 with
 cte_source as
 (
