@@ -1,4 +1,4 @@
-/*
+{#
 
 with
 cte_source as
@@ -70,4 +70,4 @@ group by
         , src.diff_hsh
         , src.dbt_dv_utils_ts
 
-*/
+*}
