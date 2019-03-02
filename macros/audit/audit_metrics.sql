@@ -62,8 +62,9 @@ for MS SQL, we could:
             {% if variable != None %}'{{ relation }}'{% else %}null::varchar(512){% endif %},
             '{{ invocation_id }}',
             count(*)
-            from  "{{ schema }}"."{{ relation }}"
-            where invocation_id = '{{ invocation_id }}'
+            from  "{{ schema }}"."{{ relation }}" dest
+            where dest.invocation_id = '{{ invocation_id }}'
+            and exists (select 1 from "{{ schema }}"."{{ relation }}" dest2 dest2.invocation_id = '{{ invocation_id }}')
 
 {% endmacro %}
 
