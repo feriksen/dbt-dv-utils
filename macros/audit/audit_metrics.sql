@@ -55,6 +55,16 @@ for MS SQL, we could:
             '{{ invocation_id }}',
             count(*)
             from  "{{ schema }}"."{{ relation }}"
+        union
+        select
+            'model run rowcount',
+            {% if variable != None %}'{{ schema }}'{% else %}null::varchar(512){% endif %},
+            {% if variable != None %}'{{ relation }}'{% else %}null::varchar(512){% endif %},
+            '{{ invocation_id }}',
+            count(*)
+            from  "{{ schema }}"."{{ relation }}"
+            where invocation_id = '{{ invocation_id }}'
+
 {% endmacro %}
 
 {% macro create_metrics_schema() %}
