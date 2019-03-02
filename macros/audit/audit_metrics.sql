@@ -1,7 +1,6 @@
 {#
 shamelessly stolen from dbt-event-logging
 #}
-
 {% macro get_metrics_relation() %}
     {%- set metrics_table =
         api.Relation.create(
@@ -11,7 +10,6 @@ shamelessly stolen from dbt-event-logging
         ) -%}
     {{ return(metrics_table) }}
 {% endmacro %}
-
 
 {% macro get_metrics_schema() %}
     {% set metrics_table = dbt_dv_utils.get_metrics_relation() %}
@@ -24,23 +22,28 @@ for MS SQL, we could:
   from sys.partitions where index_id = min(index_id) to be much(!) more efficient
 #}
 {% macro log_metrics_event(event_name, schema, relation) %}
+        insert into {{ dbt_dv_utils.get_metrics_relation() }} (
+            event_name,
+            event_schema,
+            event_model,
+            invocation_id,
+            event_row_count
+            )
 
-    insert into {{ dbt_dv_utils.get_metrics_relation() }} (
-        event_name,
-        event_schema,
-        event_model,
-        invocation_id,
-        event_row_count
-        )
+        select
+            '{{ event_name }}',
+            {% if variable != None %}'{{ schema }}'{% else %}null::varchar(512){% endif %},
+            {% if variable != None %}'{{ relation }}'{% else %}null::varchar(512){% endif %},
+            '{{ invocation_id }}',
 
-    select
-        '{{ event_name }}',
-        {% if variable != None %}'{{ schema }}'{% else %}null::varchar(512){% endif %},
-        {% if variable != None %}'{{ relation }}'{% else %}null::varchar(512){% endif %},
-        '{{ invocation_id }}',
-        count(*)
-        from  "{{ schema }}"."{{ relation }}"
+            {% if flags.FULL_REFRESH %}
+            0
+            
+            {% else %}
+            count(*)
+            from  "{{ schema }}"."{{ relation }}"
 
+            {% endif %}
 {% endmacro %}
 
 
