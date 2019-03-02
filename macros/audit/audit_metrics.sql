@@ -21,6 +21,24 @@ for MS SQL, we could:
   select sum([rows])
   from sys.partitions where index_id = min(index_id) to be much(!) more efficient
 #}
+{% macro log_metrics_event_zero(event_name, schema, relation) %}
+        insert into {{ dbt_dv_utils.get_metrics_relation() }} (
+            event_name,
+            event_schema,
+            event_model,
+            invocation_id,
+            event_row_count
+            )
+
+        select
+            '{{ event_name }}',
+            {% if variable != None %}'{{ schema }}'{% else %}null::varchar(512){% endif %},
+            {% if variable != None %}'{{ relation }}'{% else %}null::varchar(512){% endif %},
+            '{{ invocation_id }}',
+            0
+
+{% endmacro %}
+
 {% macro log_metrics_event(event_name, schema, relation) %}
         insert into {{ dbt_dv_utils.get_metrics_relation() }} (
             event_name,
@@ -35,17 +53,9 @@ for MS SQL, we could:
             {% if variable != None %}'{{ schema }}'{% else %}null::varchar(512){% endif %},
             {% if variable != None %}'{{ relation }}'{% else %}null::varchar(512){% endif %},
             '{{ invocation_id }}',
-
-            {% if flags.FULL_REFRESH %}
-            0
-            
-            {% else %}
             count(*)
             from  "{{ schema }}"."{{ relation }}"
-
-            {% endif %}
 {% endmacro %}
-
 
 {% macro create_metrics_schema() %}
     create schema if not exists {{ dbt_dv_utils.get_metrics_schema() }}
@@ -66,9 +76,15 @@ for MS SQL, we could:
 {% endmacro %}
 
 {% macro log_metrics_start_event() %}
-    {{dbt_dv_utils.log_metrics_event(
+    {% if flags.FULL_REFRESH %}
+    {{dbt_dv_utils.log_metrics_event_zero(
         'model initial rowcount', this.schema, this.name
         )}}
+    {% else %}
+        {{dbt_dv_utils.log_metrics_event(
+            'model initial rowcount', this.schema, this.name
+            )}}
+        {% endif %}
 {% endmacro %}
 
 
