@@ -60,17 +60,6 @@ shamelessly stolen from dbt-event-logging
 
 {% endmacro %}
 
-
-{% macro log_run_start_event() %}
-    {{logging.log_audit_metrics_event('run started')}}
-{% endmacro %}
-
-
-{% macro log_run_end_event() %}
-    {{logging.log_audit_metrics_event('run completed')}}; commit;
-{% endmacro %}
-
-
 {% macro log_model_start_event() %}
     {% if is_incremental() %}
     {{logging.log_audit_metrics_event(
@@ -85,5 +74,5 @@ shamelessly stolen from dbt-event-logging
     {{logging.log_audit_metrics_event(
         'model final rowcount', this.schema, this.name
         )}}
-    {% endif %}        
+    {% endif %}
 {% endmacro %}
